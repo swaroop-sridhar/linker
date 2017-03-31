@@ -931,6 +931,7 @@ namespace Mono.Linker.Steps {
 
 		protected void MarkFields (TypeDefinition type, bool includeStatic)
 		{
+			Console.WriteLine("MarkFields{0}", type);			
 			if (!type.HasFields)
 				return;
 
@@ -943,6 +944,8 @@ namespace Mono.Linker.Steps {
 
 		protected virtual void MarkMethods (TypeDefinition type)
 		{
+			Console.WriteLine("MarkMethods{0}", type);			
+
 			if (type.HasMethods)
 				MarkMethodCollection (type.Methods);
 		}

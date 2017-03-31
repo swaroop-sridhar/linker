@@ -83,6 +83,7 @@ namespace Mono.Linker.Steps {
 		{
 			while (iterator.MoveNext ()) {
 				AssemblyDefinition assembly = GetAssembly (context, GetFullName (iterator.Current));
+				Console.WriteLine("Processing {0}", assembly);
 				ProcessTypes (assembly, iterator.Current.SelectChildren ("type", _ns));
 				ProcessNamespaces (assembly, iterator.Current.SelectChildren ("namespace", _ns));
 			}
@@ -118,6 +119,7 @@ namespace Mono.Linker.Steps {
 			while (iterator.MoveNext ()) {
 				XPathNavigator nav = iterator.Current;
 				string fullname = GetFullName (nav);
+			        Console.WriteLine("Processing {0}", fullname);
 
 				if (IsTypePattern (fullname)) {
 					ProcessTypePattern (fullname, assembly, nav);
@@ -161,6 +163,7 @@ namespace Mono.Linker.Steps {
 
 		void MatchType (TypeDefinition type, Regex regex, XPathNavigator nav)
 		{
+		        Console.WriteLine("Match Type {0}", type);
 			if (regex.Match (type.FullName).Success)
 				ProcessType (type, nav);
 
@@ -207,8 +210,10 @@ namespace Mono.Linker.Steps {
 		void ProcessType (TypeDefinition type, XPathNavigator nav)
 		{
 			TypePreserve preserve = GetTypePreserve (nav);
+			Console.WriteLine("ProcessType {0} {1}", type, nav);
 
 			if (!IsRequired (nav)) {
+ 				Console.WriteLine("No Nav");
 				Annotations.SetPreserve (type, preserve);
 				return;
 			}
@@ -291,6 +296,7 @@ namespace Mono.Linker.Steps {
 
 		void MarkField (TypeDefinition type, FieldDefinition field, string signature)
 		{
+			Console.WriteLine("Mark {0} fild {1}", type, field);
 			if (field != null)
 				Annotations.Mark (field);
 			else
@@ -346,10 +352,15 @@ namespace Mono.Linker.Steps {
 		void MarkMethod (TypeDefinition type, MethodDefinition method, string signature)
 		{
 			if (method != null) {
+   			        Console.WriteLine("Mark {0} method {1}", type, method);
+			
 				Annotations.Mark (method);
 				Annotations.SetAction (method, MethodAction.Parse);
-			} else
+			} else {
+			       Console.WriteLine("Unresolved Mark {0} method {1}", type, method);
+			
 				AddUnresolveMarker (string.Format ("T: {0}; M: {1}", type, signature));
+				}
 		}
 
 		void ProcessMethodName (TypeDefinition type, string name)

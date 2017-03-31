@@ -145,10 +145,15 @@ namespace Mono.Linker {
 		public void SetPreserve (TypeDefinition type, TypePreserve preserve)
 		{
 			TypePreserve existing;
-			if (preserved_types.TryGetValue (type, out existing))
+			if (preserved_types.TryGetValue (type, out existing)) {
 				preserved_types [type] = ChoosePreserveActionWhichPreservesTheMost (existing, preserve);
-			else
-				preserved_types.Add (type, preserve);
+  	    	                Console.WriteLine("Set Preserved types {0} {1}", type, preserve);
+
+			} else {
+   				preserved_types.Add (type, preserve);
+  	    	                Console.WriteLine("Preserved types {0} {1}", type, preserve);
+	 		}
+				
 		}
 
 		public static TypePreserve ChoosePreserveActionWhichPreservesTheMost (TypePreserve leftPreserveAction, TypePreserve rightPreserveAction)
