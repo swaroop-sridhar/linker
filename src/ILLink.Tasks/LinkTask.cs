@@ -123,19 +123,23 @@ namespace ILLink.Tasks
 			set => _illinkPath = value;
 		}
 
-		protected override string GenerateCommandLineCommands ()
+		protected override string GenerateResponseFileCommands()
 		{
-			var args = new StringBuilder ();
-			args.Append (ILLinkPath);
+			StringBuilder rsp = new StringBuilder();
 
-			if (RootDescriptorFiles != null) {
-				foreach (var rootFile in RootDescriptorFiles) {
-					args.Append (" -x ").Append (rootFile.ItemSpec);
+			rsp.AppendLine ($"\"{ILLinkPath}\"");
+
+			if (RootDescriptorFiles != null)
+			{
+				foreach (var rootFile in RootDescriptorFiles)
+				{
+					rsp.AppendLine ($"-x \"{rootFile.ItemSpec}\"");
 				}
 			}
 
-			foreach (var assemblyItem in RootAssemblyNames) {
-				args.Append (" -a ").Append (assemblyItem.ItemSpec);
+			foreach (var assemblyItem in RootAssemblyNames)
+			{
+				rsp.AppendLine ($"-a \"{assemblyItem.ItemSpec}\"");
 			}
 
 			HashSet<string> directories = new HashSet<string> (StringComparer.OrdinalIgnoreCase);
@@ -149,14 +153,12 @@ namespace ILLink.Tasks
 				var dir = Path.GetDirectoryName (assemblyPath);
 				if (!directories.Contains (dir)) {
 					directories.Add (dir);
-					args.Append (" -d ").Append (dir);
+					rsp.AppendLine ($"-d \"{dir}\"");
 				}
 
 				string action = assembly.GetMetadata ("action");
 				if ((action != null) && (action.Length > 0)) {
-					args.Append (" -p ");
-					args.Append (action);
-					args.Append (" ").Append (assemblyName);
+					rsp.AppendLine ($" -p {action} \"{assemblyName}\"");
 				}
 			}
 
@@ -172,35 +174,33 @@ namespace ILLink.Tasks
 				var dir = Path.GetDirectoryName (assemblyPath);
 				if (!directories.Contains (dir)) {
 					directories.Add (dir);
-					args.Append (" -d ").Append (dir);
+					rsp.AppendLine ($"-d \"{dir}\"");
 				}
 
 				// Treat reference assemblies as "skip". Ideally we
 				// would not even look at the IL, but only use them to
 				// resolve surface area.
-				args.Append (" -p skip ").Append (assemblyName);
+				rsp.AppendLine ($" -p skip \"{assemblyName}\"");
 			}
 
 			if (OutputDirectory != null) {
-				args.Append (" -out ").Append (OutputDirectory.ItemSpec);
+				rsp.AppendLine ($" -out \"{OutputDirectory.ItemSpec}\"");
 			}
 
 			if (ClearInitLocals) {
-				args.Append (" -s ");
 				// Version of ILLink.CustomSteps is passed as a workaround for msbuild issue #3016
-				args.Append ("LLink.CustomSteps.ClearInitLocalsStep,ILLink.CustomSteps,Version=0.0.0.0:OutputStep");
+				args.AppendLine (" -s LLink.CustomSteps.ClearInitLocalsStep,ILLink.CustomSteps,Version=0.0.0.0:OutputStep");
 				if ((ClearInitLocalsAssemblies != null) && (ClearInitLocalsAssemblies.Length > 0)) {
-					args.Append (" -m ClearInitLocalsAssemblies ");
-					args.Append (ClearInitLocalsAssemblies);
+					rsp.AppendLine ($" -m ClearInitLocalsAssemblies {ClearInitLocalsAssemblies}");
 				}
 			}
 
 			if (ExtraArgs != null) {
-				args.Append (" ").Append (ExtraArgs);
+				rsp.AppendLine (ExtraArgs);
 			}
 
 			if (DumpDependencies)
-				args.Append (" --dump-dependencies");
+				rsp.AppendLine ("--dump-dependencies");
 
 			return args.ToString ();
 		}
